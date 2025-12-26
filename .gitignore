@@ -4,3 +4,6 @@ __pycache__/
 *.log
 .DS_Store
 .idea/
+docker/clickhouse/data/
+docker/mysql/data/
+docker/kafka/data/
