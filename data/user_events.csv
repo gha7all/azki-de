@@ -1,4 +1,4 @@
-event_time,user_id,session_id,event_type,channel,premium_amount
+event_timestamp,user_id,session_id,event_name,traffic_channel,premium_amount
 2025-10-01 14:39:08,610,s_1,purchase,Google Ads,42456912
 2025-10-13 20:40:27,4588,s_2,policy_click,Organic,39564130
 2025-10-16 14:18:47,4425,s_3,quote_view,Referral,44171778

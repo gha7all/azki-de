@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Iterable
 
 from pyspark.sql import SparkSession, DataFrame
-from pyspark.sql.functions import col, to_timestamp, lit
+from pyspark.sql.functions import col, to_timestamp, lit, coalesce
 from utils.connections import get_clickhouse_client
 
 
@@ -48,7 +48,7 @@ def to_denorm_rows(df):
             event_ts,
             int(r.user_id) if r.user_id else 0,
             r.session_id or "",
-            r.event_type or "",
+            r.event_name or "",
             r.channel or "",
             int(r.premium_amount) if r.premium_amount else 0,
             getattr(r, "order_id", None),
@@ -80,16 +80,20 @@ def main():
     args = parse_args()
     spark = SparkSession.builder.appName("azki-backfill").getOrCreate()
 
-    events_df = spark.read.option("header", True).csv(args.events)
-    events_df = events_df.filter(col("event_type") == "purchase")
-    users_df = spark.read.option("header", True).csv(args.users)
+    # Use read_events helper so --since/--until are respected and event_time is normalized
+    events_df = read_events(spark, args.events, args.since, args.until)
+    # normalize column: prefer `event_name`, fall back to legacy `event_type`
+    events_df = events_df.withColumn("event_name", coalesce(col("event_name"), col("event_type")))
+    events_df = events_df.filter(col("event_name") == "purchase")
+
+    users_df = read_users(spark, args.users)
     joined = events_df.join(users_df, events_df.user_id.cast("int") == users_df.user_id.cast("int"), how="left")
 
     denorm_rdd = to_denorm_rows(joined.select(
-        col("event_time").alias("event_timestamp"),
+        col("event_timestamp"),
         col("user_id"),
         col("session_id"),
-        col("event_type"),
+        col("event_name"),
         col("channel"),
         col("premium_amount"),
         col("order_id"),

@@ -4,19 +4,7 @@ import signal
 from typing import List, Tuple
 
 from kafka import KafkaConsumer
-from clickhouse_driver import Client
 from utils.connections import get_clickhouse_client, get_kafka_bootstrap
-
-
-def _clickhouse_client() -> Client:
-    return Client(
-        host=os.getenv("CLICKHOUSE_HOST", "clickhouse"),
-        port=int(os.getenv("CLICKHOUSE_PORT", "9000")),
-        user=os.getenv("CLICKHOUSE_USER", "azki_user"),
-        password=os.getenv("CLICKHOUSE_PASSWORD", "azki_pass"),
-        database=os.getenv("CLICKHOUSE_DB", "azki"),
-    )
-
 
 def main():
     bootstrap = get_kafka_bootstrap()
@@ -48,16 +36,15 @@ def main():
             if not running:
                 break
             e = msg.value
-            # map the CSV fields to the ClickHouse `user_events` table
             batch.append(
                 (
-                    e.get("event_time"),
-                    int(e.get("user_id", 0)),
-                    str(e.get("session_id", "")),
-                    str(e.get("event_type", "")),
-                    str(e.get("channel", "")),
-                    int(e.get("premium_amount", 0)),
-                )
+                        e.get("event_timestamp") or e.get("event_time"),
+                        int(e.get("user_id", 0)),
+                        str(e.get("session_id", "")),
+                        str(e.get("event_name") or e.get("event_type") or ""),
+                        str(e.get("traffic_channel") or e.get("channel") or ""),
+                        int(e.get("premium_amount", 0)),
+                    )
             )
 
             if len(batch) >= 500:
