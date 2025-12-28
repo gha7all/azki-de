@@ -1,4 +1,3 @@
-"""Seed small sample rows into financial_order table for local testing."""
 from __future__ import annotations
 
 from utils.connections import get_clickhouse_client

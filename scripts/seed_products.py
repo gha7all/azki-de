@@ -1,7 +1,3 @@
-"""Seed small sample rows into product_* tables for local testing.
-
-Run inside the repo root (it uses Docker hostnames by default).
-"""
 from __future__ import annotations
 
 from utils.connections import get_clickhouse_client

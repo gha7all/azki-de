@@ -1,9 +1,3 @@
-"""Publish a few sample purchase events to Kafka for the user_events topic.
-
-This script uses the project's connection helpers and defaults to the
-`data/user_events.csv` path if you want to adapt it. For a quick smoke test
-it emits a handful of `purchase` events with matching `order_id` values.
-"""
 from __future__ import annotations
 
 import json
