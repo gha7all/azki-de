@@ -36,7 +36,7 @@ def read_users(spark: SparkSession, path: str) -> DataFrame:
         jdbc_url = "jdbc:mysql://%s:%s/%s" % (
             os.getenv("MYSQL_HOST", "mysql"), os.getenv("MYSQL_PORT", "3306"), os.getenv("MYSQL_DB", "azki_db")
         )
-        return spark.read.format("jdbc").option("url", jdbc_url).option("dbtable", "users").option("user", os.getenv("MYSQL_USER", "etl_app_user")).option("password", os.getenv("MYSQL_PASSWORD", "etl_app_pass")).load()
+        return spark.read.format("jdbc").option("url", jdbc_url).option("dbtable", "users").option("user", os.getenv("MYSQL_USER", "mysql_user")).option("password", os.getenv("MYSQL_PASSWORD", "mysql_pass")).load()
     else:
         return spark.read.option("header", True).csv(path)
 
@@ -64,7 +64,6 @@ def to_denorm_rows(df):
 
 
 def write_to_clickhouse(partition: Iterable, batch_size: int = 1000):
-    # Use centralized ClickHouse client factory so env handling is consistent.
     client = get_clickhouse_client()
     batch = []
     for row in partition:
@@ -79,10 +78,7 @@ def write_to_clickhouse(partition: Iterable, batch_size: int = 1000):
 def main():
     args = parse_args()
     spark = SparkSession.builder.appName("azki-backfill").getOrCreate()
-
-    # Use read_events helper so --since/--until are respected and event_time is normalized
     events_df = read_events(spark, args.events, args.since, args.until)
-    # normalize column: prefer `event_name`, fall back to legacy `event_type`
     events_df = events_df.withColumn("event_name", coalesce(col("event_name"), col("event_type")))
     events_df = events_df.filter(col("event_name") == "purchase")
 

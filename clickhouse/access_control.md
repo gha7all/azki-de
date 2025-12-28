@@ -11,7 +11,3 @@
 	sudden spikes in data retrieval that might indicate exfiltration.
 - Apply column-level masking, or provide curated views that obfuscate sensitive
 	fields for analysts who don't require full access.
-
-These controls are recommendations to start a governance conversation. Exact
-policies (roles, masking rules, encryption-at-rest, key rotation) should be
-defined by your security and compliance teams.

@@ -9,8 +9,8 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: azki_db
-      MYSQL_USER: etl_app_user
-      MYSQL_PASSWORD: etl_app_pass
+      MYSQL_USER: mysql_user
+      MYSQL_PASSWORD: mysql_pass
       MYSQL_ROOT_PASSWORD: root_password
     ports:
       - "3306:3306"
@@ -44,8 +44,6 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
 
-      # A valid base64-encoded 16-byte value is required for KRaft mode
-      # This decodes to ASCII '1234567890abcdef' and is acceptable for local dev
       CLUSTER_ID: "MTIzNDU2Nzg5MGFiY2RlZg=="
 
       KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
