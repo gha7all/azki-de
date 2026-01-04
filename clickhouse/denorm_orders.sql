@@ -54,6 +54,7 @@ UNION ALL
 SELECT order_id, 'fire' AS product_type, product_id, details FROM product_fire;
 
 
+
 CREATE TABLE IF NOT EXISTS user_events_denorm
 (
     event_timestamp   DateTime,
@@ -62,8 +63,8 @@ CREATE TABLE IF NOT EXISTS user_events_denorm
     event_name        LowCardinality(String),
     traffic_channel   LowCardinality(String),
     premium_amount    UInt64,
-    order_id          Nullable(UInt64),
-    product_type      Nullable(LowCardinality(String)),
+    order_id          UInt64,
+    product_type      LowCardinality(String),
     product_id        Nullable(UInt64),
     product_details   Nullable(String),
     financial_amount  Nullable(UInt64),
@@ -86,14 +87,12 @@ SELECT
     event_name,
     traffic_channel,
     premium_amount,
-    if(event_name = 'purchase', toNullable(order_id), NULL) AS order_id,
-    if(event_name = 'purchase', po.product_type, NULL) AS product_type,
-    if(event_name = 'purchase', po.product_id, NULL) AS product_id,
-    if(event_name = 'purchase', po.details, NULL) AS product_details,
-    if(event_name = 'purchase', fo.amount, NULL) AS financial_amount,
-    if(event_name = 'purchase', fo.payment_status, NULL) AS payment_status,
+    NULL AS order_id,
+    NULL AS product_type,
+    NULL AS product_id,
+    NULL AS product_details,
+    NULL AS financial_amount,
+    NULL AS payment_status,
     now() AS ingestion_time
-FROM user_events_kafka ue
-LEFT JOIN product_orders_all AS po ON ue.order_id = po.order_id
-LEFT JOIN financial_order AS fo ON ue.order_id = fo.order_id
-WHERE ue.event_name = 'purchase';
+FROM user_events_kafka
+WHERE event_name = 'purchase';
