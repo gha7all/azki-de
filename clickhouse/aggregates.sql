@@ -1,4 +1,3 @@
--- Aggregated events table: monthly aggregates by city and event
 CREATE TABLE IF NOT EXISTS events_agg
 (
     agg_month       String,
